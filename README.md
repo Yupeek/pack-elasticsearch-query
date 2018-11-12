@@ -67,31 +67,31 @@ to make multiple query for a given host, you can add more services to your host.
     }
     
     define service{
-		   use            elasticsearch-query
-		   service_description           check_maiev_logs
-		   register       1
-		   host_name      my-host
-		   
-		   _ESQ_QUERY source.project: "yupeek/maiev" AND source.environment: prod
-		   _ESQ_RANGE now-1h
-		   _ESQ_WARN .hits.total<10
-		   _ESQ_CRIT .hits.total<1
-		   _ESQ_DATA {logs: .hits.total}
-		}
-		
-		
+       use            elasticsearch-query
+       service_description           check_maiev_logs
+       register       1
+       host_name      my-host
+       
+       _ESQ_QUERY source.project: "yupeek/maiev" AND source.environment: prod
+       _ESQ_RANGE now-1h
+       _ESQ_WARN .hits.total<10
+       _ESQ_CRIT .hits.total<1
+       _ESQ_DATA {logs: .hits.total}
+    }
+    
+    
     define service{
-		   use            elasticsearch-query
-		   service_description           check_other_logs
-		   register       1
-		   host_name      my-host
-		   
-		   _ESQ_QUERY source.project: "yupeek/other" AND source.environment: prod
-		   _ESQ_RANGE now-1h
-		   _ESQ_WARN .hits.total<10
-		   _ESQ_CRIT .hits.total<1
-		   _ESQ_DATA {logs: .hits.total}
-		}
+       use            elasticsearch-query
+       service_description           check_other_logs
+       register       1
+       host_name      my-host
+       
+       _ESQ_QUERY source.project: "yupeek/other" AND source.environment: prod
+       _ESQ_RANGE now-1h
+       _ESQ_WARN .hits.total<10
+       _ESQ_CRIT .hits.total<1
+       _ESQ_DATA {logs: .hits.total}
+    }
 
 
 this will create the host without default check, but will add 2 services which both will make a distinct query to elasticsearch.
