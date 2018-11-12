@@ -1,0 +1,25 @@
+{
+	"name": "elasticsearch-query",
+	"types": ["pack"],
+	"version": "1.1.1",
+	"homepage": "https://github.com/Yupeek/pack-elasticsearch-query",
+	"author": "Darius BERNARD",
+	"description": "request elasticsearch to reteirve metrics about logs. allow to detect errors logged in elasticsearch by other apps",
+	"contributors": [
+	  {
+		"name": "Darius BERNARD",
+		"email": "darius@xornot.fr"
+	  }
+	],
+	"repository": "https://github.com/Yupeek/pack-elasticsearch-query",
+	"keywords": [
+	   "pack",
+	   "elasticsearch",
+	   "logs",
+	   "metrics"
+	],
+	"dependencies": {
+	  "shinken": ">=1.4"
+	},
+	"license": "GPL3"
+}
