@@ -30,26 +30,72 @@ this other exemple will check if the latest value of a specific field
 (app.extra.nb\_published) in ES is always \> 1400:
 
     define host{
-      name           my-publisher-host
-      address        ...
-      use            elasticsearch-query
-      register       0
-
-    _ESQ_HOST $HOSTADDRESS$
-        _ESQ_PORT 9200
-        _ESQ_URL  /_search
-        _ESQ_CREDENTIALS
-        _ESQ_QUERY  {"_source":["@timestamp","app.extra.nb_published"],"size":1,"sort":[{"@timestamp":{"order":"desc"}}],"query":{"bool":{"must":[{"match":{"source.environment":"prod"}},{"match":{"source.service_name":"joboffer_algolia_publisher"}},{"exists":{"field":"app.extra.nb_published"}}]}}}
-        _ESQ_RANGE now-2h
-        _ESQ_WARN .hits.total>0 and .hits.hits[]._source.app.extra.nb_published < 1400
-        _ESQ_CRIT .hits.total>0 and .hits.hits[]._source.app.extra.nb_published < 500
-        _ESQ_DATA {logs: .hits.total, published: (.hits.hits[0]._source.app.extra.nb_published // 0)}
-
+       name           my-publisher-host
+       address        ...
+       use            elasticsearch-query
+       
+       _ESQ_HOST $HOSTADDRESS$
+       _ESQ_PORT 9200
+       _ESQ_URL  /_search
+       _ESQ_CREDENTIALS
+       _ESQ_QUERY  {"_source":["@timestamp","app.extra.nb_published"],"size":1,"sort":[{"@timestamp":{"order":"desc"}}],"query":{"bool":{"must":[{"match":{"source.environment":"prod"}},{"match":{"source.service_name":"joboffer_algolia_publisher"}},{"exists":{"field":"app.extra.nb_published"}}]}}}
+       _ESQ_RANGE now-2h
+       _ESQ_WARN .hits.total>0 and .hits.hits[]._source.app.extra.nb_published < 1400
+       _ESQ_CRIT .hits.total>0 and .hits.hits[]._source.app.extra.nb_published < 500
+       _ESQ_DATA {logs: .hits.total, published: (.hits.hits[0]._source.app.extra.nb_published // 0)}
+       
     }
 
 see
 <https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html>
 to write the \_ESQ\_QUERY part
+
+multiple query, multiple service/host
+-------------------------------------
+
+to make multiple query for a given host, you can add more services to your host.
+
+    define host {
+    
+      name my-host
+      use  generic-host
+      
+      _ESQ_HOST my-es-server.lan
+      _ESQ_PORT 9200
+      _ESQ_URL  /_search
+      
+    }
+    
+    define service{
+		   use            elasticsearch-query
+		   service_description           check_maiev_logs
+		   register       1
+		   host_name      my-host
+		   
+		   _ESQ_QUERY source.project: "yupeek/maiev" AND source.environment: prod
+		   _ESQ_RANGE now-1h
+		   _ESQ_WARN .hits.total<10
+		   _ESQ_CRIT .hits.total<1
+		   _ESQ_DATA {logs: .hits.total}
+		}
+		
+		
+    define service{
+		   use            elasticsearch-query
+		   service_description           check_other_logs
+		   register       1
+		   host_name      my-host
+		   
+		   _ESQ_QUERY source.project: "yupeek/other" AND source.environment: prod
+		   _ESQ_RANGE now-1h
+		   _ESQ_WARN .hits.total<10
+		   _ESQ_CRIT .hits.total<1
+		   _ESQ_DATA {logs: .hits.total}
+		}
+
+
+this will create the host without default check, but will add 2 services which both will make a distinct query to elasticsearch.
+
 
 requirements
 ------------
