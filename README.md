@@ -54,11 +54,14 @@ multiple query, multiple service/host
 -------------------------------------
 
 to make multiple query for a given host, you can add more services to your host.
+1. use `generic-elasticsearch-query` instead of `elasticsearch-query`
+2. define as many service as you need, using `elasticsearch-query` and with `host_name=<your-host>`
+
 
     define host {
     
       name my-host
-      use  generic-host
+      use  generic-host,generic-elasticsearch-query
       
       _ESQ_HOST my-es-server.lan
       _ESQ_PORT 9200
@@ -158,3 +161,11 @@ expression](https://stedolan.github.io/jq/manual/)
 \* `_ESQ_DATA` must return a dict with the metrics you whant to display
 in shinken. it's easier to understant why a check has failed if you add
 the matching metrics in `_ESQ_DATA`.
+
+### Troubleshooting
+
+if the plugin fail, he will return UNKNOWN and try to add some usefull information to shinken.
+if it crash, he will write the latest args and error in `/tmp/check_elasticsearch_query.log`.
+
+to debug your error, you can enable verbosity of the script by doing `sed 's#if False:#if True:#g' -i /var/lib/shinken/libexec/check_elasticsearch_query.py`
+this will log all call args into `/tmp/check_elasticsearch_query.log`

@@ -4,6 +4,7 @@
 
 import argparse
 import json
+import datetime
 
 
 import sys
@@ -121,7 +122,7 @@ def main(argv):
     try:
         res = requests.get(args['url'], data=json.dumps(query), headers={'content-type': 'application/json'})
     except Exception as e:
-        print('UNKNOWN - error while qerying the service %s' % (e,))
+        print('UNKNOWN - error while querying the service %s: %r' % (args['url'], e,))
         return 3
     if res.status_code >= 400:
         print('UNKNOWN - elasticsearch responded [%s] %s' % (res.status_code, res.text))
@@ -129,7 +130,7 @@ def main(argv):
     try:
         esdata = res.json()
     except Exception as e:
-        print('UNKNOWN - error while qerying the service %s' % e)
+        print('UNKNOWN - error while parsing response %r: [%s] %s' % (e, res.status_code, res.text))
         return 3
     if args['crit'].transform(esdata):
         status = 'CRITICAL - [Triggered by %s]' % args['crit_text'], 2
@@ -153,4 +154,15 @@ def main(argv):
 
 
 if __name__ == '__main__':
-    sys.exit(main(sys.argv))
+    if False:
+        with open('/tmp/check_elasticsearch_query.log', 'w') as f:
+            f.write("%s: %s" % (datetime.datetime.now().strftime('%c'), ' '.join("'%s'" % a for a in sys.argv)))
+    try:
+        sys.exit(main(sys.argv))
+    except Exception as e:
+        import traceback
+        print("'UNKNOWN - fatal error in plugin, check /tmp/check_elasticsearch_query.log. : %s" % e)
+        with open('/tmp/check_elasticsearch_query.log', 'w') as f:
+            f.write("%s: %s" % (datetime.datetime.now().strftime('%c'), sys.argv))
+            traceback.print_exc(file=f)
+        sys.exit(3)
